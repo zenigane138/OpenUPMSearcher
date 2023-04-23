@@ -1,0 +1,23 @@
+{
+    "name": "com.okanegames.openupmsearcher",
+    "displayName": "OpenUPMSearcher",
+    "version": "1.0.0",
+    "unity": "2020.1",
+    "description": "OpenUPM package search in the Unity editor. Works without Node.js.",
+    "author": {
+        "name": "zenigane",
+        "url": "https://github.com/zenigane138"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zenigane138/OpenUPMSearcher"
+    },
+    "keywords": [
+        "unity",
+        "openupm",
+        "searcher"
+    ],
+    "license": "MIT",
+    "dependencies": {
+    }
+}
