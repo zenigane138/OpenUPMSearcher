@@ -6,8 +6,7 @@ using UnityEngine.Networking;
 using System.Threading.Tasks;
 using System.IO;
 using System;
-using Unity.Plastic.Newtonsoft.Json.Linq;
-//using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace OkaneGames.OpenUPMSearcher.Editor
 {
@@ -155,15 +154,18 @@ GitHub APIには1分と1時間あたりのリクエスト回数制限機能が�
                         if (count++ >= DisplayMax) continue;
 
                         EditorGUILayout.BeginHorizontal();
-                        GUILayout.Space(10);
-                        // 自分のパッケージを見つけやすいようにこれぐらいは許してほしい
-                        EditorGUILayout.LabelField(packageName.Contains("com.okanegames") ? "★" + packageName : packageName, EditorStyles.wordWrappedLabel);
-                        GUILayout.Space(10);
-                        if (GUILayout.Button("Register", GUILayout.Width(60)))
                         {
-                            var result = RegisterScope(packageName);
+                            GUILayout.Space(10);
+                            // 自分のパッケージを見つけやすいようにこれぐらいは許してほしい
+                            EditorGUILayout.LabelField(packageName.Contains("com.okanegames") ? "★" + packageName : packageName, EditorStyles.wordWrappedLabel);
+                            GUILayout.Space(10);
+                            if (GUILayout.Button("Register", GUILayout.Width(60)))
+                            {
+                                var result = RegisterScope(packageName);
 
-                            var message = @"
+                                if (result)
+                                {
+                                    var message = @"
 Registration succeeded.
 Open manifest.json to reflect this in the UnityEditor.
 To be precise, deactivate Unity once and it will be reflected.
@@ -174,15 +176,17 @@ Unityエディタに反映するためmanifest.jsonを開きます。
 正確にはUnityを一度非アクティブにすれば反映されます。
 ProjectSettingsへ反映されていたらPackageManager(Packages:Unity Registry)からインストールが可能になります。
 ";
-                            if (EditorUtility.DisplayDialog("Result", message, "OK"))
-                            {
-                                var path = Path.Combine(Application.dataPath.Replace("/Assets", ""), "Packages/manifest.json");
-                                System.Diagnostics.Process.Start(path);
+                                    if (result && EditorUtility.DisplayDialog("Result", message, "OK"))
+                                    {
+                                        var path = Path.Combine(Application.dataPath.Replace("/Assets", ""), "Packages/manifest.json");
+                                        System.Diagnostics.Process.Start(path);
+                                    }
+                                }
                             }
-                        }
-                        if (GUILayout.Button("Web", GUILayout.Width(36)))
-                        {
-                            Application.OpenURL("https://openupm.com/packages/" + packageName + "/");
+                            if (GUILayout.Button("Web", GUILayout.Width(36)))
+                            {
+                                Application.OpenURL("https://openupm.com/packages/" + packageName + "/");
+                            }
                         }
                         EditorGUILayout.EndHorizontal();
                     }
