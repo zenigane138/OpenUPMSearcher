@@ -5,9 +5,10 @@
 OpenUPM Searcher is an editor extension window for Unity that provides package search functionality for OpenUPM and registration to ProjectSettings (manifest.json).  
 Node.js or openupm-cli installation is not required.
 
-![](https://img.shields.io/badge/Unity-2020.1%20or%20later-lightgrey)
+![](https://img.shields.io/badge/Unity-2021.2%20or%20later-lightgrey)
 [![](https://img.shields.io/badge/license-MIT-orange)](https://github.com/zenigane138/AnythingBookmark/blob/main/LICENSE.md)
 [![](https://img.shields.io/badge/readme-%E6%97%A5%E6%9C%AC%E8%AA%9E%E7%89%88-red)](/README_ja.md)
+[![openupm](https://img.shields.io/npm/v/com.okanegames.openupmsearcher?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.okanegames.openupmsearcher/)
 [![](https://img.shields.io/badge/Follow-FFFFFF.svg?logo=twitter&style=flat)](https://twitter.com/intent/follow?screen_name=zenigane138)
 
 ![image](https://user-images.githubusercontent.com/36072156/233836921-1c8cb572-5666-4cf9-9082-0d24895702cb.png)
@@ -17,7 +18,11 @@ Node.js or openupm-cli installation is not required.
 - Registration to ProjectSettings (manifest.json)
 
 ## Requirements
-- Unity 2020.1 or later
+- Unity 2021.2 or later
+
+## Dependencies
+- Depends on Json.NET ( Newtonsoft.Json )  
+  - package.json specifies "com.unity.nuget.newtonsoft-json" in the Unity registry  
 
 ## Installation
 - unitypackage

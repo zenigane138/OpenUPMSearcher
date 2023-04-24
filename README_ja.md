@@ -7,7 +7,7 @@ The English version of README.md is available [here](/README.md).
 OpenUPM Searcher は UnityEditor 上で OpenUPM のパッケージ検索機能と ProjecetSettings(manifest.json) への登録機能を提供するエディタ拡張ウィンドウです。  
 Node.js や openupm-cli のインストールは不要です。  
 
-![](https://img.shields.io/badge/Unity-2020.1%20or%20later-lightgrey)
+![](https://img.shields.io/badge/Unity-2021.2%20or%20later-lightgrey)
 [![](https://img.shields.io/badge/license-MIT-orange)](https://github.com/zenigane138/AnythingBookmark/blob/main/LICENSE.md)
 [![](https://img.shields.io/badge/readme-English-red)](/README_ja.md)
 [![](https://img.shields.io/badge/Follow-FFFFFF.svg?logo=twitter&style=flat)](https://twitter.com/intent/follow?screen_name=zenigane138)
@@ -22,7 +22,12 @@ Node.js や openupm-cli のインストールは不要です。
 動作環境
 ---
 - 必須
-  - Unity 2020.1 以降
+  - Unity 2021.2 以降
+
+依存関係
+---
+- Json.NET ( Newtonsoft.Json ) に依存しています  
+  - package.json では Unity レジストリの "com.unity.nuget.newtonsoft-json" を指定しています  
 
 インストール方法
 ---
