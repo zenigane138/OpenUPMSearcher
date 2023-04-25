@@ -22,6 +22,13 @@ namespace OkaneGames.OpenUPMSearcher.Editor
         private string _searchText = "";
         private List<string> _packageNameList = null;
 
+        private enum Message
+        {
+            None,
+            GitHubAPI,
+            ManifestJson,
+        }
+
 #if UNITY_2017_1_OR_NEWER
         [MenuItem("Window/OkaneGames/", priority = Int32.MaxValue)]
 #endif
@@ -47,18 +54,7 @@ namespace OkaneGames.OpenUPMSearcher.Editor
                     if (_packageNameList == null) CreatePackageListCacheFromGitHubAPI();
                     else
                     {
-                        var message = @"
-This search process uses the GitHub API to retrieve the list of package files in the master branch of the OpenUPM repository.
-
-The GitHub API has a limit on the number of requests per minute and per hour.
-
-We recommend that you do not run the search process more than necessary, as one search process per day is more than enough.
-
-この検索処理はGitHub APIを使用してOpenUPMリポジトリのmasterブランチのパッケージファイル一覧を取得しています。
-GitHub APIには1分と1時間あたりのリクエスト回数制限機能があります。
-1日1回の検索処理で十分すぎる程なので必要以上に実行しないことをおすすめします。
-";
-                        if (EditorUtility.DisplayDialog("Confirm", message, "Search", "Cancel"))
+                        if (EditorUtility.DisplayDialog("Confirm", GetDialogMessage(Message.GitHubAPI), "Call API", "Cancel"))
                         {
                             CreatePackageListCacheFromGitHubAPI();
                         }
@@ -66,7 +62,7 @@ GitHub APIには1分と1時間あたりのリクエスト回数制限機能が�
                 }
                 GUI.backgroundColor = tempBGColor;
 
-                if(File.Exists(CacheFilePath)) GUILayout.Label(new GUIContent("API cache file: exists", "Last updated:" + File.GetLastWriteTime(CacheFilePath)));
+                if (File.Exists(CacheFilePath)) GUILayout.Label(new GUIContent("API cache file: exists", "Last updated:" + File.GetLastWriteTime(CacheFilePath)));
                 else GUILayout.Label("API cache file: not exist");
             }
             GUILayout.EndHorizontal();
@@ -143,6 +139,7 @@ GitHub APIには1分と1時間あたりのリクエスト回数制限機能が�
             }
             else if (_searchText.Length > 0 && _packageNameList != null)
             {
+                bool isOpenManifestJson = false;
                 var count = 0;
                 _scroll = EditorGUILayout.BeginScrollView(_scroll);
                 {
@@ -155,38 +152,26 @@ GitHub APIには1分と1時間あたりのリクエスト回数制限機能が�
 
                         EditorGUILayout.BeginHorizontal();
                         {
-                            GUILayout.Space(10);
-                            // 自分のパッケージを見つけやすいようにこれぐらいは許してほしい
-                            EditorGUILayout.LabelField(packageName.Contains("com.okanegames") ? "★" + packageName : packageName, EditorStyles.wordWrappedLabel);
-                            GUILayout.Space(10);
-                            if (GUILayout.Button("Register", GUILayout.Width(60)))
-                            {
-                                var result = RegisterScope(packageName);
-
-                                if (result)
-                                {
-                                    var message = @"
-Registration succeeded.
-Open manifest.json to reflect this in the UnityEditor.
-To be precise, deactivate Unity once and it will be reflected.
-If it is reflected in ProjectSettings, you can install it from PackageManager (Packages:Unity Registry).
-
-登録に成功しました。
-Unityエディタに反映するためmanifest.jsonを開きます。
-正確にはUnityを一度非アクティブにすれば反映されます。
-ProjectSettingsへ反映されていたらPackageManager(Packages:Unity Registry)からインストールが可能になります。
-";
-                                    if (result && EditorUtility.DisplayDialog("Result", message, "OK"))
-                                    {
-                                        var path = Path.Combine(Application.dataPath.Replace("/Assets", ""), "Packages/manifest.json");
-                                        System.Diagnostics.Process.Start(path);
-                                    }
-                                }
-                            }
-                            if (GUILayout.Button("Web", GUILayout.Width(36)))
+                            if (GUILayout.Button(new GUIContent("Web", "Open in Web Browser\n" + "https://openupm.com/packages/" + packageName + "/"), GUILayout.Width(36)))
                             {
                                 Application.OpenURL("https://openupm.com/packages/" + packageName + "/");
                             }
+
+                            if (GUILayout.Button(new GUIContent("Register", "Register to manifest.json.\n'" + packageName + "'"), GUILayout.Width(60)))
+                            {
+                                var result = RegisterScope(packageName);
+                                if (result)
+                                {
+                                    if (EditorUtility.DisplayDialog("Result", GetDialogMessage(Message.ManifestJson), "OK"))
+                                    {
+                                        // ここで直接 System.Diagnostics.Process.Start() を実行するとレイアウト系エラーが発生するので後から実行
+                                        isOpenManifestJson = true;
+                                    }
+                                }
+                            }
+
+                            // 自分のパッケージを見つけやすいようにこれぐらいは許してほしい
+                            EditorGUILayout.LabelField(packageName.Contains("com.okanegames") ? "★" + packageName : packageName, EditorStyles.wordWrappedLabel);
                         }
                         EditorGUILayout.EndHorizontal();
                     }
@@ -195,7 +180,18 @@ ProjectSettingsへ反映されていたらPackageManager(Packages:Unity Registry
 
                 if (count > DisplayMax) GUILayout.Label(count - DisplayMax + " packages have been omitted from display.");
                 GUILayout.Label("Matched packages " + count + " / " + _packageNameList.Count + ".");
+
+                if (isOpenManifestJson)
+                {
+                    OpenManifestJson();
+                }
             }
+        }
+
+        private void OpenManifestJson()
+        {
+            var path = Path.Combine(Application.dataPath.Replace("/Assets", ""), "Packages/manifest.json");
+            System.Diagnostics.Process.Start(path);
         }
 
         private void DrawZeniganeLink()
@@ -411,6 +407,42 @@ ProjectSettingsへ反映されていたらPackageManager(Packages:Unity Registry
                     Debug.Log("Create cache file. path:" + CacheFilePath);
                 }
             }
+        }
+
+        private string GetDialogMessage(Message msg)
+        {
+            var str = "";
+            if (msg == Message.None) { }
+            else if (msg == Message.GitHubAPI)
+            {
+                str = @"
+This process calls the GitHub API to retrieve the list of package files in the master branch of the OpenUPM repository and create a cache file.
+The GitHub API has a limit on the number of requests per minute and per hour.
+Once the cache file is created at the first startup, there is no need to regenerate it for the time being.
+We recommend that you do not run it more than necessary.
+
+この処理はGitHub APIを呼び出してOpenUPMリポジトリのmasterブランチのパッケージファイル一覧を取得してキャッシュファイルを作成しています。
+GitHub APIには1分と1時間あたりのリクエスト回数制限機能があります。
+初回起動時に一度キャッシュファイルを作成すれば当分再生成の必要はありません。
+必要以上に実行しないことをおすすめします。
+";
+            }
+            else if (msg == Message.ManifestJson)
+            {
+                str = @"
+Registration succeeded.
+Open manifest.json to reflect this in the UnityEditor.
+To be precise, deactivate Unity once and it will be reflected.
+If it is reflected in ProjectSettings, you can install it from PackageManager (Packages:Unity Registry).
+
+登録に成功しました。
+Unityエディタに反映するためmanifest.jsonを開きます。
+正確にはUnityを一度非アクティブにすれば反映されます。
+ProjectSettingsへ反映されていたらPackageManager(Packages:Unity Registry)からインストールが可能になります。
+";
+            }
+
+            return str;
         }
 
     }
