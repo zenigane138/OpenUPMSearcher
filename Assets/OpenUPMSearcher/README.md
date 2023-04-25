@@ -25,6 +25,7 @@ Node.js or openupm-cli installation is not required.
   - package.json specifies "com.unity.nuget.newtonsoft-json" in the Unity registry  
 
 ## Installation
+Choose 'unitypackage' if you want to resolve dependencies manually, or choose 'PackageManager' if you want automatic resolution.  
 - unitypackage
   - Download the unitypackage from the Releases page:
   - https://github.com/zenigane138/OpenUPMSearcher/releases

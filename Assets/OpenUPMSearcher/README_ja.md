@@ -31,6 +31,7 @@ Node.js や openupm-cli のインストールは不要です。
 
 インストール方法
 ---
+依存関係を手動で解決したい方は unitypackage を選び、自動で解決して欲しい方は PackageManager を選んで下さい。  
 - unitypackage
   - Releases ページから unitypackage をダウンロード
   - https://github.com/zenigane138/OpenUPMSearcher/releases
