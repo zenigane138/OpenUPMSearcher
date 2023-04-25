@@ -137,55 +137,67 @@ namespace OkaneGames.OpenUPMSearcher.Editor
                 EditorGUILayout.Space();
                 GUILayout.Label("Enter a filter string in the 'Filter' field.");
             }
-            else if (_searchText.Length > 0 && _packageNameList != null)
+
+            bool isOpenManifestJson = false;
+            var count = 0;
+            _scroll = EditorGUILayout.BeginScrollView(_scroll);
             {
-                bool isOpenManifestJson = false;
-                var count = 0;
-                _scroll = EditorGUILayout.BeginScrollView(_scroll);
+                if (_searchText.Length > 0 && _packageNameList != null)
                 {
                     foreach (var packageName in _packageNameList)
                     {
                         if (!packageName.Contains(_searchText)) continue;
 
-                        // 一定件数を超えたら省略
+                        // 一定件数を超えたら表示省略
                         if (count++ >= DisplayMax) continue;
 
-                        EditorGUILayout.BeginHorizontal();
-                        {
-                            if (GUILayout.Button(new GUIContent("Web", "Open in Web Browser\n" + "https://openupm.com/packages/" + packageName + "/"), GUILayout.Width(36)))
-                            {
-                                Application.OpenURL("https://openupm.com/packages/" + packageName + "/");
-                            }
-
-                            if (GUILayout.Button(new GUIContent("Register", "Register to manifest.json.\n'" + packageName + "'"), GUILayout.Width(60)))
-                            {
-                                var result = RegisterScope(packageName);
-                                if (result)
-                                {
-                                    if (EditorUtility.DisplayDialog("Result", GetDialogMessage(Message.ManifestJson), "OK"))
-                                    {
-                                        // ここで直接 System.Diagnostics.Process.Start() を実行するとレイアウト系エラーが発生するので後から実行
-                                        isOpenManifestJson = true;
-                                    }
-                                }
-                            }
-
-                            // 自分のパッケージを見つけやすいようにこれぐらいは許してほしい
-                            EditorGUILayout.LabelField(packageName.Contains("com.okanegames") ? "★" + packageName : packageName, EditorStyles.wordWrappedLabel);
-                        }
-                        EditorGUILayout.EndHorizontal();
+                        DrawPackage(packageName, ref isOpenManifestJson);
                     }
                 }
-                EditorGUILayout.EndScrollView();
 
-                if (count > DisplayMax) GUILayout.Label(count - DisplayMax + " packages have been omitted from display.");
-                GUILayout.Label("Matched packages " + count + " / " + _packageNameList.Count + ".");
-
-                if (isOpenManifestJson)
-                {
-                    OpenManifestJson();
-                }
             }
+            EditorGUILayout.EndScrollView();
+
+            if (count > DisplayMax) GUILayout.Label(count - DisplayMax + " packages have been omitted from display.");
+            GUILayout.Label("Matched packages " + count + " / " + _packageNameList.Count + ".");
+
+            if (isOpenManifestJson)
+            {
+                OpenManifestJson();
+            }
+        }
+
+        private void DrawPackage(string packageName, ref bool isOpenManifestJson)
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                if (GUILayout.Button(new GUIContent("Web", "Open in Web Browser\n" + "https://openupm.com/packages/" + packageName + "/"), GUILayout.Width(36)))
+                {
+                    Application.OpenURL("https://openupm.com/packages/" + packageName + "/");
+                }
+
+                if (GUILayout.Button(new GUIContent("Register", "Register to manifest.json.\n'" + packageName + "'"), GUILayout.Width(60)))
+                {
+                    var result = RegisterScope(packageName);
+                    if (result)
+                    {
+                        if (EditorUtility.DisplayDialog("Result", GetDialogMessage(Message.ManifestJson), "OK"))
+                        {
+                            // ここで直接 System.Diagnostics.Process.Start() を実行するとレイアウト系エラーが発生するので後から実行
+                            isOpenManifestJson = true;
+                        }
+                    }
+                }
+
+                // パッケージ名の検索文字列部分の強調表示
+                var style = new GUIStyle(EditorStyles.wordWrappedLabel);
+                style.richText = true;
+                var displayName = packageName.Replace(_searchText, "<color=lime>" + _searchText + "</color>");
+                // 自分のパッケージを見つけやすいようにこれぐらいは許してほしい
+                displayName = packageName.Contains("com.okanegames") ? "★" + displayName : displayName;
+                EditorGUILayout.LabelField(displayName, style);
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         private void OpenManifestJson()
