@@ -1,9 +1,9 @@
 {
     "name": "com.okanegames.openupmsearcher",
     "displayName": "OpenUPMSearcher",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "unity": "2021.2",
-    "description": "OpenUPM package search in the Unity editor. Works without Node.js.",
+    "description": "OpenUPM package search in the Unity editor. Node.js or openupm-cli installation is not required.",
     "author": {
         "name": "zenigane",
         "url": "https://github.com/zenigane138"
