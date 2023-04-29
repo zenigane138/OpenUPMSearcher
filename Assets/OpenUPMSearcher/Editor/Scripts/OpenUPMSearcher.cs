@@ -218,7 +218,7 @@ namespace OkaneGames.OpenUPMSearcher.Editor
                 }
                 if (GUILayout.Button(new GUIContent("Blog", ""), GUILayout.Width(35)))
                 {
-                    Application.OpenURL("https://zenigane138.hateblo.jp/?from=ab1");
+                    Application.OpenURL("https://zenigane138.hateblo.jp/?from=openupmsearcher");
                 }
                 if (GUILayout.Button(new GUIContent("Twitter", ""), GUILayout.Width(55)))
                 {
