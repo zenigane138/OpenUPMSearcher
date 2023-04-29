@@ -15,12 +15,38 @@ namespace OkaneGames.OpenUPMSearcher.Editor
         private static readonly string WindowTitle = "OpenUPM Searcher";
         private static readonly Vector2 WindowMinSize = new Vector2(350, 200);
 
+        private static readonly string MatchedColorEditorUserSettingsKey = WindowTitle + "_MatchedColorJSON";
         private static readonly string CacheFilePath = "Library/com.okanegames.openupmsearcher/api_cache.txt";
         private static readonly int DisplayMax = 100;
 
         private Vector2 _scroll;
         private string _searchText = "";
         private List<string> _packageNameList = null;
+
+        private Nullable<Color> _matchedColor = null;
+        private Color _MatchedColor
+        {
+            get
+            {
+                if(_matchedColor == null)
+                {
+                    var json = EditorUserSettings.GetConfigValue(MatchedColorEditorUserSettingsKey);
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        _matchedColor = new Color32(131, 119, 255, 255);
+                    }
+                    else
+                    {
+                        _matchedColor = JsonUtility.FromJson<Color>(json);
+                    }
+                }
+                return _matchedColor.Value;
+            }
+            set
+            {
+                _matchedColor = value;
+            }
+        }
 
         private enum Message
         {
@@ -81,11 +107,24 @@ namespace OkaneGames.OpenUPMSearcher.Editor
             }
             GUILayout.EndHorizontal();
 
-            if (GUILayout.Button("Open manifest.json"))
+            GUILayout.BeginHorizontal();
             {
-                var path = Path.Combine(Application.dataPath.Replace("/Assets", ""), "Packages/manifest.json");
-                System.Diagnostics.Process.Start(path);
+                GUILayout.Label("Matched Highlight", GUILayout.Width(110));
+                var color = EditorGUILayout.ColorField(_MatchedColor);
+                if (_MatchedColor != color)
+                {
+                    //Debug.Log(color.ToString() + " :" + Event.current.type.ToString());
+                    _MatchedColor = color;
+                    EditorUserSettings.SetConfigValue(MatchedColorEditorUserSettingsKey, JsonUtility.ToJson(color));
+                }
+
+                if (GUILayout.Button("Open manifest.json"))
+                {
+                    var path = Path.Combine(Application.dataPath.Replace("/Assets", ""), "Packages/manifest.json");
+                    System.Diagnostics.Process.Start(path);
+                }
             }
+            GUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
             {
@@ -192,7 +231,7 @@ namespace OkaneGames.OpenUPMSearcher.Editor
                 // パッケージ名の検索文字列部分の強調表示
                 var style = new GUIStyle(EditorStyles.wordWrappedLabel);
                 style.richText = true;
-                var displayName = packageName.Replace(_searchText, "<color=lime>" + _searchText + "</color>");
+                var displayName = packageName.Replace(_searchText, $"<color=#{ColorUtility.ToHtmlStringRGB(_MatchedColor)}>" + _searchText + "</color>");
                 // 自分のパッケージを見つけやすいようにこれぐらいは許してほしい
                 displayName = packageName.Contains("com.okanegames") ? "★" + displayName : displayName;
                 EditorGUILayout.LabelField(displayName, style);
