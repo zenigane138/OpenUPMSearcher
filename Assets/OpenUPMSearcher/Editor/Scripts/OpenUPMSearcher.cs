@@ -116,7 +116,7 @@ namespace OkaneGames.OpenUPMSearcher.Editor
             else
             {
                 // キャッシュファイルはあるけど、リストが空
-                if (_packageNameList == null)
+                if (_packageNameList == null || _packageNameList.Count == 0)
                 {
                     if (File.Exists(CacheFilePath))
                     {
